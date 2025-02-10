@@ -5,7 +5,7 @@ import Lines from "./Lines";
 function App() {
   return (
     <>
-      <Lines />
+      <Polylines />
     </>
   );
 }

@@ -8,8 +8,8 @@ const Lines = () => {
   const canvasRef = useRef(null);
   const [raycaster] = useState(new THREE.Raycaster());
   const [mouse, setMouse] = useState(new THREE.Vector2());
-  const [isDrawing, setIsDrawing] = useState(false);
   const [startPoint, setStartPoint] = useState(null);
+  const [isDrawing, setIsDrawing] = useState(false);
 
   const { scene, camera, renderer } = useThreeScene(canvasRef);
 
@@ -43,9 +43,16 @@ const Lines = () => {
 
     if (intersects.length > 0) {
       const point = intersects[0].point;
-      setStartPoint(point);
-      lineStore.setStartPoint(point.x, point.y, point.z);
-      setIsDrawing(true);
+
+      if (!isDrawing) {
+        setStartPoint(point);
+        lineStore.setStartPoint(point.x, point.y, point.z);
+        setIsDrawing(true);
+      } else {
+        lineStore.finalizeLine(scene);
+        setIsDrawing(false);
+        setStartPoint(null);
+      }
     }
   };
 
@@ -73,26 +80,16 @@ const Lines = () => {
     }
   };
 
-  const onMouseUp = () => {
-    if (!scene || !startPoint) return;
-
-    setIsDrawing(false);
-    lineStore.finalizeLine(scene);
-    setStartPoint(null);
-  };
-
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    canvas.addEventListener("pointerdown", onMouseDown);
-    canvas.addEventListener("pointermove", onMouseMove);
-    canvas.addEventListener("pointerup", onMouseUp);
+    canvas.addEventListener("click", onMouseDown);
+    canvas.addEventListener("mousemove", onMouseMove);
 
     return () => {
-      canvas.removeEventListener("pointerdown", onMouseDown);
-      canvas.removeEventListener("pointermove", onMouseMove);
-      canvas.removeEventListener("pointerup", onMouseUp);
+      canvas.removeEventListener("click", onMouseDown);
+      canvas.removeEventListener("mousemove", onMouseMove);
     };
   }, [scene, camera, startPoint, isDrawing]);
 
