@@ -10,17 +10,14 @@ class LineStore {
     makeAutoObservable(this);
   }
 
-  // Set the start point of the line
   setStartPoint(x, y, z) {
     this.startPoint = new THREE.Vector3(x, y, z);
   }
 
-  // Update the temporary line as the mouse moves
   updateLine(x, y, z, scene) {
     if (this.startPoint) {
       const pointsArray = [this.startPoint, new THREE.Vector3(x, y, z)];
 
-      // Dispose of the previous temporary line if it exists
       if (this.currentLine) {
         scene.remove(this.currentLine);
         this.currentLine.geometry.dispose();
@@ -35,8 +32,7 @@ class LineStore {
     }
   }
 
-  // Finalize the line and add it to the list of lines
-  finalizeLine(scene) {
+  finalizeLine() {
     if (this.currentLine) {
       this.lines.push(this.currentLine);
       this.startPoint = null;
@@ -44,7 +40,6 @@ class LineStore {
     }
   }
 
-  // Clear all lines from the scene
   clearLines(scene) {
     this.lines.forEach((line) => {
       scene.remove(line);
