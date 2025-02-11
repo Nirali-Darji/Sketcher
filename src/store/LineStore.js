@@ -5,13 +5,14 @@ class LineStore {
   lines = [];
   startPoint = null;
   currentLine = null;
-
+  isDrawing = false;
   constructor() {
     makeAutoObservable(this);
   }
 
   setStartPoint(x, y, z) {
     this.startPoint = new THREE.Vector3(x, y, z);
+    this.isDrawing = true;
   }
 
   updateLine(x, y, z, scene) {
@@ -37,6 +38,7 @@ class LineStore {
       this.lines.push(this.currentLine);
       this.startPoint = null;
       this.currentLine = null;
+      this.isDrawing = false;
     }
   }
 
@@ -49,6 +51,7 @@ class LineStore {
     this.lines = [];
     this.startPoint = null;
     this.currentLine = null;
+    this.isDrawing = false;
   }
 }
 

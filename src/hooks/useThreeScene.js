@@ -26,13 +26,6 @@ const useThreeScene = () => {
 
     // const axesHelper = new THREE.AxesHelper(5);
     // newScene.add(axesHelper);
-
-    const planeGeo = new THREE.PlaneGeometry(10000, 10000, 1, 1);
-    const planeMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-    const planeMesh = new THREE.Mesh(planeGeo, planeMaterial);
-    planeMesh.rotation.x = -Math.PI / 2;
-    newScene.add(planeMesh);
-
     setScene(newScene);
     setCamera(newCamera);
     setRenderer(newRenderer);
@@ -49,7 +42,17 @@ const useThreeScene = () => {
     };
   }, []);
 
-  return { scene, camera, renderer };
+  useEffect(() => {
+    const animate = () => {
+      if (scene && camera && renderer) {
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
+      }
+    };
+    animate();
+  }, [scene, camera, renderer]);
+
+  return { scene, camera };
 };
 
 export default useThreeScene;
