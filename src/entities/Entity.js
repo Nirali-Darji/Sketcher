@@ -58,6 +58,10 @@ class Entity extends THREE.Object3D {
   addConstructionPoint(inPoint) {
     this.mConstructionPoints.push(inPoint);
   }
+  updateLastConstructionPoint(inPoint) {
+    this.mConstructionPoints[this.mConstructionPoints.length - 1] =
+      new THREE.Vector3(inPoint.x, inPoint.y, inPoint.z);
+  }
 }
 
 export default Entity;

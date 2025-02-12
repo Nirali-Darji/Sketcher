@@ -1,20 +1,24 @@
 import * as THREE from "three";
 import EntityType from "../utils/EntityType";
-import Entity from "../entities/Entity";
 import Line from "../entities/Line";
+import Circle from "../entities/Circle";
+import Ellipse from "../entities/Ellipse";
+import Polyline from "../entities/Polyline";
+import { makeAutoObservable } from "mobx";
 
 class SketcherStore {
   mEntities = [];
   camera = null;
   scene = null;
   sphereColor = "red";
-  planeColor = "white";
+  planeColor = "yellow";
   isSphereVisible = false;
   currentEntityType = null;
   currentEntity = null;
+  selectedEntity = null;
 
   sphere = new THREE.Mesh(
-    new THREE.SphereGeometry(5, 10, 10),
+    new THREE.CircleGeometry(1, 32),
     new THREE.MeshBasicMaterial({
       color: this.sphereColor,
       visible: this.isSphereVisible,
@@ -32,30 +36,34 @@ class SketcherStore {
     });
     const planeMesh = new THREE.Mesh(planeGeo, planeMaterial);
     planeMesh.rotation.x = -Math.PI / 2;
+
+    this.sphere.rotation.x = -Math.PI * 0.5;
     this.scene?.add(planeMesh);
 
     this.scene?.add(this.sphere);
 
     this.onMouseDown = this.onMouseDown.bind(this);
     this.onMouseMove = this.onMouseMove.bind(this);
-    this.onMouseUp = this.onMouseUp.bind(this);
+    this.onDoubleClick = this.onDoubleClick.bind(this);
+    this.onClick = this.onClick.bind(this);
+    makeAutoObservable(this);
   }
 
   addEntity(inEntity) {
     if (Object.values(EntityType).includes(inEntity.mType)) {
       this.mEntities.push(inEntity);
-      this.scene.add(inEntity);
     } else {
       console.error("Invalid entity type");
     }
   }
 
   getIntersectionPoint(event) {
+    const canvas = document.querySelector("canvas");
+    const rect = canvas.getBoundingClientRect();
     const mouseCords = new THREE.Vector2(
-      (event.clientX / window.innerWidth) * 2 - 1,
-      -(event.clientY / window.innerHeight) * 2 + 1
+      ((event.clientX - rect.left) / rect.width) * 2 - 1,
+      -((event.clientY - rect.top) / rect.height) * 2 + 1
     );
-
     const rayCaster = new THREE.Raycaster();
     rayCaster.setFromCamera(mouseCords, this.camera);
 
@@ -66,31 +74,104 @@ class SketcherStore {
   onMouseDown(event) {
     const intersectPoint = this.getIntersectionPoint(event);
     if (intersectPoint) {
+      intersectPoint.y += 0.01;
       this.sphere.position.copy(intersectPoint);
       this.sphere.material.visible = this.isSphereVisible;
-
       if (this.currentEntityType) {
-        if (!this.currentEntity) {
-          this.currentEntity = new Line(this.scene);
+        if (
+          this.currentEntityType === EntityType.POLYLINE &&
+          this.currentEntity
+        ) {
           this.currentEntity.addConstructionPoint(intersectPoint);
+          return;
         }
-        this.currentEntity.addConstructionPoint(intersectPoint);
-        this.currentEntity.createMesh();
+        if (this.currentEntity) {
+          this.addEntity(this.currentEntity);
+          this.currentEntity = null;
+          this.currentEntityType = null;
+          return;
+        }
+        switch (this.currentEntityType) {
+          case EntityType.LINE:
+            this.currentEntity = new Line(this.scene);
+
+            this.currentEntity.addConstructionPoint(intersectPoint);
+            break;
+          case EntityType.CIRCLE:
+            this.currentEntity = new Circle(this.scene);
+            this.currentEntity.addConstructionPoint(intersectPoint);
+            console.log("Circle");
+            break;
+          case EntityType.ELLIPSE:
+            this.currentEntity = new Ellipse(this.scene);
+            this.currentEntity.addConstructionPoint(intersectPoint);
+            console.log("ELLIPSE");
+            break;
+          case EntityType.POLYLINE:
+            this.currentEntity = new Polyline(this.scene);
+            this.currentEntity.addConstructionPoint(intersectPoint);
+            console.log("POLYLINE");
+            break;
+          default:
+            console.warn("Entity does not match");
+            break;
+        }
+        this.currentEntity?.addConstructionPoint(intersectPoint);
+        this.currentEntity?.createMesh();
       }
     }
   }
 
   onMouseMove(event) {
     const intersectPoint = this.getIntersectionPoint(event);
-
+    if (intersectPoint) {
+      intersectPoint.y += 0.01;
+      this.sphere.position.copy(intersectPoint);
+      this.sphere.material.visible = this.isSphereVisible;
+    }
     if (intersectPoint && this.currentEntity) {
-      this.currentEntity.addConstructionPoint(intersectPoint);
+      if (this.currentEntityType === EntityType.POLYLINE) {
+        this.currentEntity.updateLastConstructionPoint(intersectPoint);
+      } else {
+        this.currentEntity.addConstructionPoint(intersectPoint);
+      }
       this.currentEntity.update();
     }
   }
 
-  onMouseUp(event) {}
+  onDoubleClick() {
+    if (this.currentEntityType === EntityType.POLYLINE) {
+      this.addEntity(this.currentEntity);
+      this.currentEntity = null;
+      this.currentEntityType = null;
+    }
+  }
 
+  onClick(event) {
+    if (!this.currentEntity && this.mEntities.length > 0) {
+      const canvas = document.querySelector("canvas");
+      const rect = canvas.getBoundingClientRect();
+      const mouseCords = new THREE.Vector2(
+        ((event.clientX - rect.left) / rect.width) * 2 - 1,
+        -((event.clientY - rect.top) / rect.height) * 2 + 1
+      );
+      const rayCaster = new THREE.Raycaster();
+      rayCaster.setFromCamera(mouseCords, this.camera);
+      const meshes = this.mEntities.map((entity) => entity.getMesh());
+      // console.log(meshes);
+
+      const intersects = rayCaster.intersectObjects(meshes, true);
+      // console.log(intersects);
+      if (intersects.length > 0) {
+        const selectedMesh = intersects[0].object;
+        const selectedEntity = this.mEntities.find(
+          (entity) => entity.getMesh() === selectedMesh
+        );
+        this.selectedEntity = selectedEntity;
+        console.log("Selected Entity:", selectedEntity);
+      }
+    }
+  }
   removeEntity(inEntity) {
     if (Object.values(EntityType).includes(inEntity.mType)) {
       const index = this.mEntities.indexOf(inEntity);

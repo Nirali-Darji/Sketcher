@@ -7,6 +7,7 @@ const useThreeScene = () => {
 
   useEffect(() => {
     const canvas = document.querySelector("canvas");
+    // console.log(canvas);
     if (!canvas) {
       return;
     }

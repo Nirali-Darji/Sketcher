@@ -1,30 +1,23 @@
-import { enumOptions } from "./utils/EntityType";
-import SketcherStore from "./store/SketcherStore";
-import useThreeScene from "./hooks/useThreeScene";
+// import { enumOptions } from "./utils/EntityType";
+
+import { observer } from "mobx-react";
+import useSketcher from "./hooks/useSketcher";
+import Navbar from "./Components/Navbar";
+import LeftSide from "./Components/LeftSide";
+import RightSide from "./Components/RightSide";
 
 function App() {
-  const { scene, camera } = useThreeScene();
-
-  const sketcher = new SketcherStore(scene, camera);
-  const canvas = document.querySelector("canvas");
-  canvas?.addEventListener("pointerdown", sketcher.onMouseDown);
-  canvas?.addEventListener("mousemove", sketcher.onMouseMove);
-
-  const handleClick = (e) => {
-    sketcher.currentEntityType = e.target.value;
-    sketcher.isSphereVisible = true;
-  };
-
+  const sketcher = useSketcher();
   return (
     <>
-      {enumOptions.map((e) => (
-        <button key={e.type} onClick={handleClick} value={e.type}>
-          {e.type}
-        </button>
-      ))}
-      <canvas />
+    <div className="min-h-screen flex min-w-[98.8vw] relative">
+      <canvas className="absolute"/>
+          <LeftSide sketcher={sketcher}/>
+          <Navbar sketcher={sketcher}/>
+          <RightSide />  
+      </div>
     </>
   );
 }
 
-export default App;
+export default observer(App);

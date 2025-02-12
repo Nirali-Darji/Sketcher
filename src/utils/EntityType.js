@@ -15,22 +15,22 @@ export const enumOptions = [
   {
     type: EntityType.LINE,
     label: "Line",
-    // icon: <TbLine />,
+    icon: TbLine,
   },
   {
     type: EntityType.CIRCLE,
     label: "Circle",
-    // icon: <FaRegCircle />,
+    icon: FaRegCircle,
   },
   {
     type: EntityType.POLYLINE,
     label: "Polyline",
-    // icon: <PiPolygonBold />,
+    icon: PiPolygonBold,
   },
   {
     type: EntityType.ELLIPSE,
     label: "Ellipse",
-    // icon: <TbOvalVertical />,
+    icon: TbOvalVertical,
   },
 ];
 
