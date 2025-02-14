@@ -3,13 +3,17 @@ import Entity from "./Entity";
 import * as THREE from "three";
 
 class Ellipse extends Entity {
+  static counter = 1;
   geometry = null;
   material = null;
   scene = null;
   constructor(inScene) {
-    super(EntityType.ELLIPSE, inScene);
+    super(EntityType.ELLIPSE, inScene, Ellipse.counter++);
     this.scene = inScene;
-    this.material = new THREE.LineBasicMaterial({ color: 0x0000ff });
+    this.material = new THREE.LineBasicMaterial({
+      color: this.mColor,
+      opacity: this.mOpacity,
+    });
   }
 
   createMesh() {
@@ -42,6 +46,7 @@ class Ellipse extends Entity {
     if (this.mMesh) {
       this.scene?.remove(this.mMesh);
       this.geometry?.dispose();
+      this.material?.dispose();
     }
     if (this.mConstructionPoints.length < 2) return;
     const radiusX = Math.abs(
@@ -63,7 +68,36 @@ class Ellipse extends Entity {
     const points = curve.getPoints(50);
     this.geometry = new THREE.BufferGeometry().setFromPoints(points);
     this.mMesh = new THREE.Line(this.geometry, this.material);
+    this.material = new THREE.LineBasicMaterial({ color: this.mColor });
+    this.mMesh.position.copy(this.mConstructionPoints[0]);
+    this.mMesh.rotation.x = -Math.PI * 0.5;
+    this.scene?.add(this.mMesh);
+  }
 
+  updateRadius(radiusX, radiusY) {
+    if (this.mMesh) {
+      this.scene?.remove(this.mMesh);
+      this.geometry?.dispose();
+      this.material?.dispose();
+    }
+    if (this.mConstructionPoints.length < 2) return;
+
+    const curve = new THREE.EllipseCurve(
+      0,
+      0,
+      radiusX,
+      radiusY,
+      0,
+      2 * Math.PI
+    );
+
+    const points = curve.getPoints(50);
+    this.geometry = new THREE.BufferGeometry().setFromPoints(points);
+    this.mMesh = new THREE.Line(this.geometry, this.material);
+    this.material = new THREE.LineBasicMaterial({
+      color: this.mColor,
+      opacity: this.mOpacity,
+    });
     this.mMesh.position.copy(this.mConstructionPoints[0]);
     this.mMesh.rotation.x = -Math.PI * 0.5;
     this.scene?.add(this.mMesh);

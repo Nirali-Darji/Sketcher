@@ -1,21 +1,23 @@
-// import { enumOptions } from "./utils/EntityType";
-
 import { observer } from "mobx-react";
-import useSketcher from "./hooks/useSketcher";
 import Navbar from "./Components/Navbar";
 import LeftSide from "./Components/LeftSide";
 import RightSide from "./Components/RightSide";
+import {  SketcherProvider } from "./Context/SketcherInstanceContext";
+import {  useRef } from "react";
 
 function App() {
-  const sketcher = useSketcher();
+  const canvasRef = useRef(null);
+
   return (
     <>
-    <div className="min-h-screen flex min-w-[98.8vw] relative">
-      <canvas className="absolute"/>
-          <LeftSide sketcher={sketcher}/>
-          <Navbar sketcher={sketcher}/>
-          <RightSide />  
-      </div>
+      <SketcherProvider canvasRef={canvasRef}>
+        <div className="min-h-screen flex min-w-[98.8vw] relative">
+          <canvas className="absolute" ref={canvasRef} />
+          <LeftSide />
+          <Navbar />
+          <RightSide />
+        </div>
+      </SketcherProvider>
     </>
   );
 }

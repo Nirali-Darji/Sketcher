@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import * as THREE from "three";
-const useThreeScene = () => {
+
+const useThreeScene = (canvasRef) => {
   const [scene, setScene] = useState(null);
   const [camera, setCamera] = useState(null);
   const [renderer, setRenderer] = useState(null);
 
   useEffect(() => {
-    const canvas = document.querySelector("canvas");
-    // console.log(canvas);
+    const canvas = canvasRef?.current;
     if (!canvas) {
       return;
     }
@@ -25,8 +25,6 @@ const useThreeScene = () => {
     const newRenderer = new THREE.WebGLRenderer({ canvas });
     newRenderer.setSize(window.innerWidth, window.innerHeight);
 
-    // const axesHelper = new THREE.AxesHelper(5);
-    // newScene.add(axesHelper);
     setScene(newScene);
     setCamera(newCamera);
     setRenderer(newRenderer);
@@ -41,7 +39,7 @@ const useThreeScene = () => {
     return () => {
       window.removeEventListener("resize", onResize);
     };
-  }, []);
+  }, [canvasRef]);
 
   useEffect(() => {
     const animate = () => {

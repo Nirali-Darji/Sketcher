@@ -11,7 +11,7 @@ class SketcherStore {
   camera = null;
   scene = null;
   sphereColor = "red";
-  planeColor = "yellow";
+  planeColor = "white";
   isSphereVisible = false;
   currentEntityType = null;
   currentEntity = null;
@@ -24,6 +24,10 @@ class SketcherStore {
       visible: this.isSphereVisible,
     })
   );
+
+  setSelectedEntity(inEntity) {
+    this.selectedEntity = inEntity;
+  }
 
   constructor(scene, camera) {
     this.camera = camera;
@@ -87,6 +91,7 @@ class SketcherStore {
         }
         if (this.currentEntity) {
           this.addEntity(this.currentEntity);
+          this.selectedEntity = this.currentEntity;
           this.currentEntity = null;
           this.currentEntityType = null;
           return;
@@ -94,23 +99,19 @@ class SketcherStore {
         switch (this.currentEntityType) {
           case EntityType.LINE:
             this.currentEntity = new Line(this.scene);
-
             this.currentEntity.addConstructionPoint(intersectPoint);
             break;
           case EntityType.CIRCLE:
             this.currentEntity = new Circle(this.scene);
             this.currentEntity.addConstructionPoint(intersectPoint);
-            console.log("Circle");
             break;
           case EntityType.ELLIPSE:
             this.currentEntity = new Ellipse(this.scene);
             this.currentEntity.addConstructionPoint(intersectPoint);
-            console.log("ELLIPSE");
             break;
           case EntityType.POLYLINE:
             this.currentEntity = new Polyline(this.scene);
             this.currentEntity.addConstructionPoint(intersectPoint);
-            console.log("POLYLINE");
             break;
           default:
             console.warn("Entity does not match");
@@ -142,6 +143,7 @@ class SketcherStore {
   onDoubleClick() {
     if (this.currentEntityType === EntityType.POLYLINE) {
       this.addEntity(this.currentEntity);
+      this.selectedEntity = this.currentEntity;
       this.currentEntity = null;
       this.currentEntityType = null;
     }
@@ -158,28 +160,82 @@ class SketcherStore {
       const rayCaster = new THREE.Raycaster();
       rayCaster.setFromCamera(mouseCords, this.camera);
       const meshes = this.mEntities.map((entity) => entity.getMesh());
-      // console.log(meshes);
 
       const intersects = rayCaster.intersectObjects(meshes, true);
-      // console.log(intersects);
       if (intersects.length > 0) {
         const selectedMesh = intersects[0].object;
         const selectedEntity = this.mEntities.find(
           (entity) => entity.getMesh() === selectedMesh
         );
         this.selectedEntity = selectedEntity;
-        console.log("Selected Entity:", selectedEntity);
       }
     }
   }
   removeEntity(inEntity) {
     if (Object.values(EntityType).includes(inEntity.mType)) {
       const index = this.mEntities.indexOf(inEntity);
+      this.selectedEntity = null;
       if (index !== -1) {
         this.mEntities.splice(index, 1);
-        this.scene.remove(inEntity);
+        this.scene.remove(inEntity.getMesh());
       }
     }
+  }
+
+  updateVisible(inEntity) {
+    const mesh = inEntity.getMesh();
+    if (mesh) {
+      mesh.visible = !mesh.visible;
+    }
+  }
+
+  readJSONFile(inData) {
+    inData.entities.forEach((entityData) => {
+      let entity;
+      switch (entityData.mType) {
+        case EntityType.LINE:
+          entity = new Line(this.scene);
+          break;
+        case EntityType.CIRCLE:
+          entity = new Circle(this.scene);
+          break;
+        case EntityType.ELLIPSE:
+          entity = new Ellipse(this.scene);
+          break;
+        case EntityType.POLYLINE:
+          entity = new Polyline(this.scene);
+          break;
+        default:
+          console.warn(`Unknown entity type: ${entityData.type}`);
+          return;
+      }
+
+      if (entity && entityData.mConstructionPoints) {
+        entityData.mConstructionPoints.forEach((point) => {
+          entity.addConstructionPoint(
+            new THREE.Vector3(point.x, point.y, point.z)
+          );
+        });
+        entity.createMesh();
+      }
+      if (entity) {
+        const color = entityData.mColor;
+        const opacity = entityData.opacity;
+        const visible = entityData.isVisible;
+        if (color) {
+          entity.setColor(color);
+        }
+        if (opacity !== undefined) {
+          entity.updateOpacity(opacity);
+        }
+        if (visible !== undefined) {
+          entity.isVisible = visible;
+        }
+      }
+      if (entity) {
+        this.addEntity(entity);
+      }
+    });
   }
 }
 

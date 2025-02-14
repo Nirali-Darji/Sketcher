@@ -3,13 +3,18 @@ import Entity from "./Entity";
 import EntityType from "../utils/EntityType";
 
 class Line extends Entity {
+  static counter = 1;
   geometry = null;
   material = null;
   scene = null;
+
   constructor(inScene) {
-    super(EntityType.LINE);
+    super(EntityType.LINE, inScene, Line.counter++);
     this.scene = inScene;
-    this.material = new THREE.LineBasicMaterial({ color: 0x0000ff });
+    this.material = new THREE.LineBasicMaterial({
+      color: this.mColor,
+      opacity: this.mOpacity,
+    });
   }
 
   createMesh() {
@@ -27,8 +32,12 @@ class Line extends Entity {
     if (this.mMesh) {
       this.scene?.remove(this.mMesh);
       this.geometry?.dispose();
+      this.material?.dispose();
     }
-
+    this.material = new THREE.LineBasicMaterial({
+      color: this.mColor,
+      opacity: this.mOpacity,
+    });
     if (this.mConstructionPoints.length >= 2) {
       this.geometry = new THREE.BufferGeometry().setFromPoints([
         this.mConstructionPoints[0],

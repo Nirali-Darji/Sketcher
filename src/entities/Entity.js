@@ -5,21 +5,33 @@ class Entity extends THREE.Object3D {
   mConstructionPoints = [];
   mType;
   mMesh = null;
-  mColor = null;
+  mColor = "#000000";
   isVisible = true;
   isActive = false;
   scene = null;
+  mOpacity = 1;
 
-  constructor(inType, inScene) {
+  constructor(inType, inScene, mName) {
     super();
     this.mType = inType;
     this.scene = inScene;
+    this.mName = mName;
   }
 
   getType() {
     return this.mType;
   }
 
+  updateOpacity(inOpacity) {
+    console.log("Updating opacity to:", inOpacity);
+    this.mOpacity = inOpacity;
+    if (this.mMesh && this.mMesh.material) {
+      this.mMesh.material.opacity = inOpacity;
+      this.mMesh.material.transparent = true;
+      this.mMesh.material.needsUpdate = true;
+      console.log("Material updated:", this.mMesh);
+    }
+  }
   getMesh() {
     return this.mMesh;
   }
@@ -31,9 +43,14 @@ class Entity extends THREE.Object3D {
     }
   }
 
+  setConstructionPoints(inPoints) {
+    this.mConstructionPoints = inPoints;
+  }
+
   setColor(inColor) {
+    this.mColor = inColor;
     if (this.mMesh && this.mMesh.material) {
-      this.mMesh.material.color = inColor;
+      this.mMesh.material.color.set(this.mColor);
     }
   }
 

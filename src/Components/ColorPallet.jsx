@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from 'react'
+import  { useContext, useEffect, useState } from 'react'
+import { SketcherContext } from '../Context/SketcherInstanceContext';
+import { observer } from 'mobx-react';
 
 
-export default function ColorPallet() {
-    const defaultColor = document.getElementById('colorInput')?.value || "RGB(0,0,0)";
-    const [color, setColor] = useState(defaultColor);
+function ColorPallet() {
+    
+    const sketcher = useContext(SketcherContext);
     const hexToRgb = (hex) =>{
         hex = hex.replace('#', '');
         
@@ -13,13 +15,25 @@ export default function ColorPallet() {
         
         return `RGB (${r}, ${g}, ${b})`;
     }
-    
-    // console.log(document.getElementById('colorInput')?.value);
-      
-   
+    const [color, setColor] = useState(hexToRgb(sketcher.selectedEntity?.mColor));
+    const [changeColor, setChangeColor] = useState(sketcher.selectedEntity?.mColor);
+
+    useEffect(() =>{
+        if(sketcher) 
+            {
+                setColor(hexToRgb(sketcher.selectedEntity?.mColor));
+                setChangeColor(sketcher.selectedEntity?.mColor);
+                console.log(changeColor);
+            }
+    },[changeColor, sketcher, sketcher.selectedEntity]);
+
+
     const colorChange = (e) =>{
         const changedColor = e.target.value;
+        sketcher?.selectedEntity?.setColor(changedColor);
+        console.log(hexToRgb(changedColor));
         setColor(hexToRgb(changedColor));
+        setChangeColor(changedColor)
     }
   return (
    <>
@@ -28,10 +42,13 @@ export default function ColorPallet() {
         Color 
     </div>
     <div className='flex gap-1'>
-        <input type='color' id='colorInput' onChange={colorChange}/>
+        <input type='color' id='colorInput' value={changeColor} onChange={colorChange}/>
         <div className='text-lg font-medium'>{color}</div>
     </div>
    </div>
    </>
   )
 }
+
+
+export default observer(ColorPallet)

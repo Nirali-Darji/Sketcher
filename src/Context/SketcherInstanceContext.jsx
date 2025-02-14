@@ -1,11 +1,12 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useState, useEffect } from "react";
 import SketcherStore from "../store/SketcherStore";
 import useThreeScene from "../hooks/useThreeScene";
+import { useMouseEvents } from "../hooks/useMouseEvents";
 
 const SketcherContext = createContext(null);
 
-export function SketcherProvider({ children }) {
-  const { scene, camera } = useThreeScene();
+export function SketcherProvider({ children, canvasRef }) {
+  const { scene, camera } = useThreeScene(canvasRef);
   const [sketcher, setSketcher] = useState(null);
 
   useEffect(() => {
@@ -14,6 +15,7 @@ export function SketcherProvider({ children }) {
       setSketcher(sketcherInstance);
     }
   }, [scene, camera]);
+  useMouseEvents(canvasRef,sketcher);
 
   return (
     <SketcherContext.Provider value={sketcher}>
@@ -22,13 +24,4 @@ export function SketcherProvider({ children }) {
   );
 }
 
-export {SketcherContext}
-
-export function useSketcher() {
-  const context = useContext(SketcherContext);
-
-  if (!context) {
-    console.error("useSketcher must be used within a SketcherProvider");
-  }
-  return context;
-}
+export { SketcherContext };
