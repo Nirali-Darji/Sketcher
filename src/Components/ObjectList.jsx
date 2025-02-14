@@ -1,7 +1,9 @@
 import React from "react";
 import { IoEye } from "react-icons/io5";
 import { BsFillTrash3Fill } from "react-icons/bs";
-export default function ObjectList({
+import { FaEyeSlash } from "react-icons/fa6";
+import { observer } from "mobx-react";
+function ObjectList({
   name,
   handleShow,
   handleDel,
@@ -10,6 +12,7 @@ export default function ObjectList({
   id,
   isSelected,
   number,
+  isHide,
 }) {
   return (
     <>
@@ -29,10 +32,18 @@ export default function ObjectList({
           </h3>
         </div>
         <div className="flex ml-auto my-auto">
-          <IoEye
-            className="text-2xl mx-4 cursor-pointer"
-            onClick={handleShow}
-          />
+          {isHide ? (
+            <IoEye
+              className="text-2xl mx-4 cursor-pointer"
+              onClick={handleShow}
+            />
+          ) : (
+            <FaEyeSlash
+              className="text-2xl mx-4 cursor-pointer"
+              onClick={handleShow}
+            />
+          )}
+
           <BsFillTrash3Fill
             className="text-xl cursor-pointer"
             onClick={handleDel}
@@ -42,3 +53,5 @@ export default function ObjectList({
     </>
   );
 }
+
+export default observer(ObjectList);

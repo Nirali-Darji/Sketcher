@@ -9,12 +9,14 @@ function LeftSide() {
   const sketcher = useContext(SketcherContext);
   const [selectedId, setSelectedId] = useState(null);
   const [selectedEntityUuid, setSelectedEntityUuid] = useState(null);
+  const [hide, setHide] = useState(!sketcher?.selectedEntity?.mMesh?.visible);
 
   useEffect(() => {
     const selectedEntity = sketcher?.selectedEntity;
 
     if (selectedEntity) {
       setSelectedEntityUuid(selectedEntity.uuid);
+      setHide(!selectedEntity.mMesh?.visible);
     }
   }, [sketcher?.selectedEntity]);
 
@@ -42,6 +44,7 @@ function LeftSide() {
   };
   const handleHide = (entity) => (e) => {
     e.stopPropagation();
+    setHide(!hide);
     sketcher?.updateVisible(entity);
   };
   return (
@@ -69,6 +72,7 @@ function LeftSide() {
             handleClick={() => handleClick(entity, index)}
             handleDel={handleDelete(entity)}
             handleShow={handleHide(entity)}
+            isHide={hide}
           />
         ))}
       </div>

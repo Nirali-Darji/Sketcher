@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
 import * as THREE from "three";
+import CameraControls from "camera-controls";
+
+CameraControls.install({ THREE: THREE });
 
 const useThreeScene = (canvasRef) => {
   const [scene, setScene] = useState(null);
   const [camera, setCamera] = useState(null);
   const [renderer, setRenderer] = useState(null);
+  const [cameraControls, setCameraControls] = useState(null);
 
   useEffect(() => {
     const canvas = canvasRef?.current;
@@ -25,9 +29,13 @@ const useThreeScene = (canvasRef) => {
     const newRenderer = new THREE.WebGLRenderer({ canvas });
     newRenderer.setSize(window.innerWidth, window.innerHeight);
 
+    const controls = new CameraControls(newCamera, newRenderer.domElement);
+    controls.mouseButtons.left = CameraControls.ACTION.NONE;
+    controls.mouseButtons.right = CameraControls.ACTION.NONE;
     setScene(newScene);
     setCamera(newCamera);
     setRenderer(newRenderer);
+    setCameraControls(controls);
 
     const onResize = () => {
       newCamera.aspect = window.innerWidth / window.innerHeight;
@@ -43,15 +51,16 @@ const useThreeScene = (canvasRef) => {
 
   useEffect(() => {
     const animate = () => {
-      if (scene && camera && renderer) {
+      if (scene && camera && renderer && cameraControls) {
         requestAnimationFrame(animate);
+        cameraControls.update();
         renderer.render(scene, camera);
       }
     };
     animate();
-  }, [scene, camera, renderer]);
+  }, [scene, camera, renderer, cameraControls]);
 
-  return { scene, camera };
+  return { scene, camera, cameraControls };
 };
 
 export default useThreeScene;

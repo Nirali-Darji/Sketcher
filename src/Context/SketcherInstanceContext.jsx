@@ -6,16 +6,17 @@ import { useMouseEvents } from "../hooks/useMouseEvents";
 const SketcherContext = createContext(null);
 
 export function SketcherProvider({ children, canvasRef }) {
-  const { scene, camera } = useThreeScene(canvasRef);
+  const { scene, camera, cameraControls } = useThreeScene(canvasRef); // Get cameraControls
   const [sketcher, setSketcher] = useState(null);
 
   useEffect(() => {
-    if (scene && camera) {
-      const sketcherInstance = new SketcherStore(scene, camera);
+    if (scene && camera && cameraControls) {
+      const sketcherInstance = new SketcherStore(scene, camera, cameraControls); // Pass cameraControls to the store
       setSketcher(sketcherInstance);
     }
-  }, [scene, camera]);
-  useMouseEvents(canvasRef,sketcher);
+  }, [scene, camera, cameraControls]);
+
+  useMouseEvents(canvasRef, sketcher);
 
   return (
     <SketcherContext.Provider value={sketcher}>

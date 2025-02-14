@@ -16,6 +16,9 @@ class SketcherStore {
   currentEntityType = null;
   currentEntity = null;
   selectedEntity = null;
+  isDrawing = false;
+  cameraControls = null;
+  isDragging = false;
 
   sphere = new THREE.Mesh(
     new THREE.CircleGeometry(1, 32),
@@ -25,13 +28,10 @@ class SketcherStore {
     })
   );
 
-  setSelectedEntity(inEntity) {
-    this.selectedEntity = inEntity;
-  }
-
-  constructor(scene, camera) {
+  constructor(scene, camera, cameraControls) {
     this.camera = camera;
     this.scene = scene;
+    this.cameraControls = cameraControls;
 
     const planeGeo = new THREE.PlaneGeometry(10000, 10000, 1, 1);
     const planeMaterial = new THREE.MeshBasicMaterial({
@@ -51,6 +51,10 @@ class SketcherStore {
     this.onDoubleClick = this.onDoubleClick.bind(this);
     this.onClick = this.onClick.bind(this);
     makeAutoObservable(this);
+  }
+
+  setSelectedEntity(inEntity) {
+    this.selectedEntity = inEntity;
   }
 
   addEntity(inEntity) {
@@ -75,13 +79,22 @@ class SketcherStore {
     return intersects.length > 0 ? intersects[0].point : null;
   }
 
+  toggleCameraControls = (isActive) => {
+    if (this.cameraControls) {
+      this.cameraControls.enabled = isActive; // Enable/Disable controls
+    }
+  };
   onMouseDown(event) {
     const intersectPoint = this.getIntersectionPoint(event);
+
     if (intersectPoint) {
       intersectPoint.y += 0.01;
       this.sphere.position.copy(intersectPoint);
       this.sphere.material.visible = this.isSphereVisible;
       if (this.currentEntityType) {
+        this.isDrawing = true;
+        this.isDragging = true;
+        this.toggleCameraControls(false);
         if (
           this.currentEntityType === EntityType.POLYLINE &&
           this.currentEntity
@@ -94,6 +107,8 @@ class SketcherStore {
           this.selectedEntity = this.currentEntity;
           this.currentEntity = null;
           this.currentEntityType = null;
+          this.isDrawing = false;
+          this.toggleCameraControls(true);
           return;
         }
         switch (this.currentEntityType) {
@@ -146,6 +161,10 @@ class SketcherStore {
       this.selectedEntity = this.currentEntity;
       this.currentEntity = null;
       this.currentEntityType = null;
+
+      this.isDrawing = false;
+      this.isDragging = false;
+      this.toggleCameraControls(true);
     }
   }
 

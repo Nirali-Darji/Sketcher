@@ -7,14 +7,22 @@ import PollyLineProperties from "./PollyLineProperties";
 import ColorPallet from "./ColorPallet";
 import { IoEye } from "react-icons/io5";
 import { BsFillTrash3Fill } from "react-icons/bs";
-import { useContext } from "react";
+import { use, useContext, useEffect, useState } from "react";
 import { SketcherContext } from "../Context/SketcherInstanceContext";
 import { observer } from "mobx-react";
 import EntityType from "../utils/EntityType";
 import OpacityBox from "./OpacityBox";
+import { FaEyeSlash } from "react-icons/fa6";
 
 function RightSide() {
   const sketcher = useContext(SketcherContext);
+  const [hide, setHide] = useState(!sketcher?.selectedEntity?.mMesh.visible);
+
+  useEffect(() => {
+    if (sketcher?.selectedEntity) {
+      setHide(!sketcher?.selectedEntity?.mMesh.visible);
+    }
+  }, [sketcher?.selectedEntity]);
 
   const handleDelete = (e) => {
     e.stopPropagation();
@@ -22,6 +30,7 @@ function RightSide() {
   };
   const handleHide = (e) => {
     e.stopPropagation();
+    setHide(!hide);
     sketcher?.updateVisible(sketcher?.selectedEntity);
   };
   const renderProperties = () => {
@@ -54,7 +63,7 @@ function RightSide() {
             <div className="flex flex-col gap-3">
               <HorizontalButton
                 name={"Hide"}
-                icon={<IoEye />}
+                icon={hide ? <IoEye /> : <FaEyeSlash />}
                 handleClick={handleHide}
               />
               <HorizontalButton

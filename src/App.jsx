@@ -2,8 +2,8 @@ import { observer } from "mobx-react";
 import Navbar from "./Components/Navbar";
 import LeftSide from "./Components/LeftSide";
 import RightSide from "./Components/RightSide";
-import {  SketcherProvider } from "./Context/SketcherInstanceContext";
-import {  useRef } from "react";
+import { SketcherProvider } from "./Context/SketcherInstanceContext";
+import { useRef } from "react";
 
 function App() {
   const canvasRef = useRef(null);
