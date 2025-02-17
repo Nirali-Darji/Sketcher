@@ -23,13 +23,13 @@ class Entity extends THREE.Object3D {
   }
 
   updateOpacity(inOpacity) {
-    console.log("Updating opacity to:", inOpacity);
+    // console.log("Updating opacity to:", inOpacity);
     this.mOpacity = inOpacity;
     if (this.mMesh && this.mMesh.material) {
       this.mMesh.material.opacity = inOpacity;
       this.mMesh.material.transparent = true;
       this.mMesh.material.needsUpdate = true;
-      console.log("Material updated:", this.mMesh);
+      // console.log("Material updated:", this.mMesh);
     }
   }
   getMesh() {

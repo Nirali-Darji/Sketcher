@@ -43,17 +43,17 @@ function Navbar() {
       console.log("No file selected.");
       return;
     }
-
-    console.log("File selected:", file);
+    event.target.value = null;
+    // console.log("File selected:", file);
 
     const reader = new FileReader();
     reader.onload = async function (e) {
-      console.log("File loaded successfully.");
+      // console.log("File loaded successfully.");
 
       try {
         const data = await JSON.parse(e.target.result);
         sketcher.readJSONFile(data);
-        console.log("Parsed data:", data);
+        // console.log("Parsed data:", data);
       } catch (err) {
         console.error("Failed to parse JSON file:", err);
       }
