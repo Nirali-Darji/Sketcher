@@ -11,7 +11,7 @@ function App() {
   return (
     <>
       <SketcherProvider canvasRef={canvasRef}>
-        <div className="min-h-screen flex min-w-[98.8vw] relative">
+        <div className="min-h-screen flex min-w-[98.8vw] relative overflow-hidden">
           <canvas className="absolute" ref={canvasRef} />
           <LeftSide />
           <Navbar />
