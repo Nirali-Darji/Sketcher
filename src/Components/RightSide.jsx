@@ -51,7 +51,7 @@ function RightSide() {
   };
   return (
     <>
-      <div className="h-screen overflow-x-scroll z-20 ml-auto bg-gray-200/70 border-0 rounded-lg w-[350px] p-3 ">
+      <div className="h-screen overflow-x-scroll z-20 ml-auto bg-gray-200/70 border-0 rounded-lg w-[360px] p-3 ">
         {sketcher?.selectedEntity ? (
           <>
             <div className="text-xl font-semibold">Properties :</div>

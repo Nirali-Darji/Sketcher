@@ -72,7 +72,7 @@ function CircleProperties() {
   }, [sketcher?.selectedEntity, centerX, centerY, centerZ, radius]);
   return (
     <>
-      <Property name={name} />
+      <Property name="Circle" />
       <div className="p-3 space-y-5">
         <div>
           <div className="text-lg font-medium">Center</div>

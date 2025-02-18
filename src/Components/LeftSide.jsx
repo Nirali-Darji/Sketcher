@@ -9,7 +9,8 @@ function LeftSide() {
   const sketcher = useContext(SketcherContext);
   const [selectedId, setSelectedId] = useState(null);
   const [selectedEntityUuid, setSelectedEntityUuid] = useState(null);
-  const [hide, setHide] = useState(!sketcher?.selectedEntity?.mMesh?.visible);
+  const [hiddenEntities, setHiddenEntities] = useState({});
+
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredEntities = sketcher?.mEntities?.filter((entity) => {
@@ -22,7 +23,10 @@ function LeftSide() {
 
     if (selectedEntity) {
       setSelectedEntityUuid(selectedEntity.uuid);
-      setHide(!selectedEntity.mMesh?.visible);
+      setHiddenEntities((prev) => ({
+        ...prev,
+        [selectedEntity.uuid]: !selectedEntity.mMesh?.visible,
+      }));
     }
   }, [sketcher?.selectedEntity]);
 
@@ -51,13 +55,14 @@ function LeftSide() {
 
   const handleHide = (entity) => (e) => {
     e.stopPropagation();
-    setHide(!hide);
+    setHiddenEntities((prev) => ({
+      ...prev,
+      [entity.uuid]: !prev[entity.uuid],
+    }));
     sketcher?.updateVisible(entity);
   };
-
   return (
-    <div className="min-h-screen bg-gray-200/70 border-0 z-20 rounded-lg w-[350px]">
-      {/* Search Bar */}
+    <div className="h-screen overflow-x-scroll bg-gray-200/70 border-0 z-20 rounded-lg w-[350px]">
       <div className="flex p-4">
         <div className="">
           <input
@@ -72,7 +77,6 @@ function LeftSide() {
       </div>
       <div className="flex border border-gray-400 w-80 mx-auto"></div>
 
-      {/* Filtered Entities List */}
       {filteredEntities?.map((entity, index) => (
         <ObjectList
           icon={enumOptions.find((e) => e.type === entity.mType).icon}
@@ -84,7 +88,7 @@ function LeftSide() {
           handleClick={() => handleClick(entity, index)}
           handleDel={handleDelete(entity)}
           handleShow={handleHide(entity)}
-          isHide={hide}
+          isHide={hiddenEntities[entity.uuid] ?? false}
         />
       ))}
     </div>
